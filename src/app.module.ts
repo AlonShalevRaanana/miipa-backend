@@ -15,12 +15,16 @@ import { User } from './users/user.entity';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
-      useFactory: () => ({
-        type: 'better-sqlite3',
-        database: 'miipa.sqlite',
-        entities: [User],
-        synchronize: true
-      })
+      useFactory: () => {
+        // Use PostgreSQL - required for Railway deployment
+        return {
+          type: 'postgres',
+          url: process.env.DATABASE_URL || 'postgresql://localhost:5432/miipa',
+          entities: [User],
+          synchronize: true,
+          ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
+        };
+      }
     }),
     Neo4jModule,
     UsersModule,
